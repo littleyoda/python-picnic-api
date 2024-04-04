@@ -5,7 +5,7 @@ from .session import PicnicAPISession, PicnicAuthError
 
 DEFAULT_URL = "https://storefront-prod.{}.picnicinternational.com/api/{}"
 DEFAULT_COUNTRY_CODE = "NL"
-DEFAULT_API_VERSION = "15"
+DEFAULT_API_VERSION = "17"
 
 
 class PicnicAPI:
@@ -36,8 +36,8 @@ class PicnicAPI:
 
         # Make the request, add special picnic headers if needed
         headers = {
-            "x-picnic-agent": "30100;1.15.183-14941;",
-            "x-picnic-did": "00DE6414C744E7CB"
+            "x-picnic-agent": "30100;1.15.232-15154",
+            "x-picnic-did": "3C417201548B2E3B"
         } if add_picnic_headers else None
         response = self.session.get(url, headers=headers).json()
 
@@ -45,6 +45,30 @@ class PicnicAPI:
             raise PicnicAuthError("Picnic authentication error")
 
         return response
+
+    def get_product_from_gtin(self, etan: str, maxRedirects: int = 5):
+
+        # Finds the product ID for a gtin/ean (barcode).
+        headers = {
+            "x-picnic-agent": "30100;1.15.232-15154",
+            "x-picnic-did": "3C417201548B2E3B"
+        }
+        url = "https://picnic.app/" + self._country_code.lower() + "/qr/gtin/" + etan
+        while maxRedirects > 0:
+            if url == "http://picnic.app/nl/link/store/storefront":
+                # gtin unknown
+                return None
+            r = self.session.get(url, headers=headers, allow_redirects=False)
+            maxRedirects -= 1
+            if ";id=" in r.url:
+                    # found the product id
+                    return r.url.split(";id=",1)[1]
+            if "Location" not in r.headers:
+                # product id not found but also no futher redirect
+                return None
+            url = r.headers["Location"]
+        return None
+
 
     def _post(self, path: str, data=None):
         url = self._base_url + path
@@ -77,8 +101,10 @@ class PicnicAPI:
         return self._get("/user")
 
     def search(self, term: str):
-        path = "/search?search_term=" + term
-        return self._get(path)
+        path = "/pages/search-page-results?search_term=" + term
+        ret = self._get(path, True)
+        ret = ret["body"]["analytics"]["contexts"]
+        return ret
 
     def get_lists(self, list_id: str = None):
         if list_id:
@@ -102,16 +128,16 @@ class PicnicAPI:
     def get_cart(self):
         return self._get("/cart")
         
-    def get_article(self, article_id: str, add_category_name=False):
+    def get_article(self, article_id: str):
         path = "/articles/" + article_id
-        article = self._get(path)
-        if add_category_name and "category_link" in article:
-            self.initialize_high_level_categories()
-            article.update(
-                category_name=_get_category_name(article['category_link'], self.high_level_categories)
-            )
+        article = self._get(path, True)
+        # if add_category_name and "category_link" in article:
+        #     self.initialize_high_level_categories()
+        #     article.update(
+        #         category_name=_get_category_name(article['category_link'], self.high_level_categories)
+        #     )
         return article
-        
+    
     def get_article_category(self, article_id: str):
         path = "/articles/" + article_id + "/category"
         return self._get(path)
