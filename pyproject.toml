@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "python-picnic-api"
+name = "python-picnic-api2"
 version = "1.1.0"
 description = ""
 license = "Apache-2.0"
-authors = ["Mike Brink <mjh.brink@icloud.com>"]
+authors = ["Mike Brink <mjh.brink@icloud.com>", "Noah Groß <pypi@codesalat.dev>"]
 readme = "README.rst"
-repository = "https://github.com/MikeBrink/python-picnic-api"
+repository = "https://github.com/codesalatdev/python-picnic-api"
 
 [tool.poetry.dependencies]
 python = "^3.6"
