@@ -6,7 +6,7 @@ from python_picnic_api.client import DEFAULT_URL
 from python_picnic_api.session import PicnicAuthError
 
 PICNIC_HEADERS = {
-    "x-picnic-agent": "30100;1.15.77-10293",
+    "x-picnic-agent": "30100;1.15.232-15154",
     "x-picnic-did": "3C417201548B2E3B",
 }
 
@@ -34,7 +34,7 @@ class TestClient(unittest.TestCase):
         PicnicAPI(username='test@test.nl', password='test')
         self.session_mock().post.assert_called_with(
             self.expected_base_url + '/user/login',
-            json={'key': 'test@test.nl', 'secret': '098f6bcd4621d373cade4e832627b4f6', "client_id": 1}
+            json={'key': 'test@test.nl', 'secret': '098f6bcd4621d373cade4e832627b4f6', "client_id": 30100}
         )
 
     def test_login_auth_token(self):
@@ -83,7 +83,7 @@ class TestClient(unittest.TestCase):
     def test_search(self):
         self.client.search("test-product")
         self.session_mock().get.assert_called_with(
-            self.expected_base_url + "/search?search_term=test-product", headers=None
+            self.expected_base_url + "/pages/search-page-results?search_term=test-product", headers=PICNIC_HEADERS
         )
 
     def test_get_lists(self):

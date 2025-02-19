@@ -1,6 +1,6 @@
 from hashlib import md5
 
-from .helper import _tree_generator, _url_generator, _get_category_name
+from .helper import _tree_generator, _url_generator, _get_category_name, _extract_search_results
 from .session import PicnicAPISession, PicnicAuthError
 
 DEFAULT_URL = "https://storefront-prod.{}.picnicinternational.com/api/{}"
@@ -24,7 +24,7 @@ class PicnicAPI:
         # Login if not authenticated
         if not self.session.authenticated and username and password:
             self.login(username, password)
-        
+
         self.high_level_categories = None
 
     def initialize_high_level_categories(self):
@@ -37,8 +37,8 @@ class PicnicAPI:
 
         # Make the request, add special picnic headers if needed
         headers = {
-            "x-picnic-agent": "30100;1.15.183-14941;",
-            "x-picnic-did": "00DE6414C744E7CB"
+            "x-picnic-agent": "30100;1.15.232-15154;",
+            "x-picnic-did": "3C417201548B2E3B"
         } if add_picnic_headers else None
         response = self.session.get(url, headers=headers).json()
 
@@ -78,8 +78,9 @@ class PicnicAPI:
         return self._get("/user")
 
     def search(self, term: str):
-        path = "/search?search_term=" + term
-        return self._get(path)
+        path = f"/pages/search-page-results?search_term={term}"
+        raw_results = self._get(path, add_picnic_headers=True)
+        return _extract_search_results(raw_results)
 
     def get_lists(self, list_id: str = None):
         if list_id:
@@ -102,7 +103,7 @@ class PicnicAPI:
 
     def get_cart(self):
         return self._get("/cart")
-        
+
     def get_article(self, article_id: str, add_category_name=False):
         path = "/articles/" + article_id
         article = self._get(path)
@@ -112,7 +113,7 @@ class PicnicAPI:
                 category_name=_get_category_name(article['category_link'], self.high_level_categories)
             )
         return article
-        
+
     def get_article_category(self, article_id: str):
         path = "/articles/" + article_id + "/category"
         return self._get(path)
