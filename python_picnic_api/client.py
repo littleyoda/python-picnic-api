@@ -37,7 +37,7 @@ class PicnicAPI:
 
         # Make the request, add special picnic headers if needed
         headers = {
-            "x-picnic-agent": "30100;1.15.232-15154;",
+            "x-picnic-agent": "30100;1.15.272-15295;",
             "x-picnic-did": "3C417201548B2E3B"
         } if add_picnic_headers else None
         response = self.session.get(url, headers=headers).json()
