@@ -4,6 +4,7 @@ from .helper import _tree_generator, _url_generator, _get_category_name
 from .session import PicnicAPISession, PicnicAuthError
 
 DEFAULT_URL = "https://storefront-prod.{}.picnicinternational.com/api/{}"
+GLOBAL_GATEWAY_URL = "https://gateway-prod.global.picnicinternational.com"
 DEFAULT_COUNTRY_CODE = "NL"
 DEFAULT_API_VERSION = "15"
 
@@ -46,8 +47,8 @@ class PicnicAPI:
 
         return response
 
-    def _post(self, path: str, data=None):
-        url = self._base_url + path
+    def _post(self, path: str, data=None, base_url_override=None):
+        url = (self._base_url if not base_url_override else base_url_override) + path
         response = self.session.post(url, json=data).json()
 
         if self._contains_auth_error(response):
