@@ -97,25 +97,6 @@ class PicnicAPI:
         raw_results = self._get(path, add_picnic_headers=True)
         return _extract_search_results(raw_results)
 
-    def get_lists(self, list_id: str = None):
-        if list_id:
-            path = "/lists/" + list_id
-        else:
-            path = "/lists"
-        return self._get(path)
-
-    def get_sublist(self, list_id: str, sublist_id: str) -> list:
-        """Get sublist.
-
-        Args:
-            list_id (str): ID of list, corresponding to requested sublist.
-            sublist_id (str): ID of sublist.
-
-        Returns:
-            list: Sublist result.
-        """
-        return self._get(f"/lists/{list_id}?sublist={sublist_id}")
-
     def get_cart(self):
         return self._get("/cart")
 

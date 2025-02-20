@@ -54,13 +54,6 @@ def test_get_article_with_category_name():
         picnic.get_article("s1018620", add_category_name=True)
 
 
-def test_get_lists():
-    response_1 = picnic.get_lists()
-    response_2 = picnic.get_lists("21725")
-    assert isinstance(response_1, list)
-    assert isinstance(response_2, list)
-
-
 def test_get_cart():
     response = picnic.get_cart()
     assert isinstance(response, dict)
