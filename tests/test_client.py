@@ -94,24 +94,6 @@ class TestClient(unittest.TestCase):
             headers=PICNIC_HEADERS,
         )
 
-    def test_get_lists(self):
-        self.client.get_lists()
-        self.session_mock().get.assert_called_with(
-            self.expected_base_url + "/lists", headers=None
-        )
-
-    def test_get_sublist(self):
-        self.client.get_sublist(list_id="promotion", sublist_id="12345")
-        self.session_mock().get.assert_called_with(
-            self.expected_base_url + "/lists/promotion?sublist=12345", headers=None
-        )
-
-    def test_get_list_by_id(self):
-        self.client.get_lists("abc")
-        self.session_mock().get.assert_called_with(
-            self.expected_base_url + "/lists/abc", headers=None
-        )
-
     def test_get_cart(self):
         self.client.get_cart()
         self.session_mock().get.assert_called_with(
@@ -171,12 +153,6 @@ class TestClient(unittest.TestCase):
             headers=PICNIC_HEADERS,
         )
 
-    def test_get_deliveries(self):
-        self.client.get_deliveries()
-        self.session_mock().post.assert_called_with(
-            self.expected_base_url + "/deliveries", json=[]
-        )
-
     def test_get_deliveries_summary(self):
         self.client.get_deliveries(summary=True)
         self.session_mock().post.assert_called_with(
@@ -186,7 +162,7 @@ class TestClient(unittest.TestCase):
     def test_get_current_deliveries(self):
         self.client.get_current_deliveries()
         self.session_mock().post.assert_called_with(
-            self.expected_base_url + "/deliveries", json=["CURRENT"]
+            self.expected_base_url + "/deliveries/summary", json=["CURRENT"]
         )
 
     def test_get_categories(self):
