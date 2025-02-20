@@ -1,12 +1,12 @@
 import unittest
 from unittest.mock import patch
 
-from python_picnic_api import PicnicAPI
-from python_picnic_api.client import DEFAULT_URL
-from python_picnic_api.session import PicnicAuthError
+from python_picnic_api2 import PicnicAPI
+from python_picnic_api2.client import DEFAULT_URL
+from python_picnic_api2.session import PicnicAuthError
 
 PICNIC_HEADERS = {
-    "x-picnic-agent": "30100;1.15.232-15154",
+    "x-picnic-agent": "30100;1.15.272-15295;",
     "x-picnic-did": "3C417201548B2E3B",
 }
 
@@ -21,7 +21,8 @@ class TestClient(unittest.TestCase):
             return self.json_data
 
     def setUp(self) -> None:
-        self.session_patcher = patch("python_picnic_api.client.PicnicAPISession")
+        self.session_patcher = patch(
+            "python_picnic_api2.client.PicnicAPISession")
         self.session_mock = self.session_patcher.start()
         self.client = PicnicAPI(username="test@test.nl", password="test")
         self.expected_base_url = DEFAULT_URL.format("nl", "15")
@@ -88,8 +89,8 @@ class TestClient(unittest.TestCase):
     def test_search(self):
         self.client.search("test-product")
         self.session_mock().get.assert_called_with(
-            self.expected_base_url
-            + "/pages/search-page-results?search_term=test-product",
+            self.expected_base_url +
+            "/pages/search-page-results?search_term=test-product",
             headers=PICNIC_HEADERS,
         )
 
@@ -207,7 +208,8 @@ class TestClient(unittest.TestCase):
         )
 
         self.assertDictEqual(
-            categories[0], {"type": "CATEGORY", "id": "purchases", "name": "Besteld"}
+            categories[0], {"type": "CATEGORY",
+                            "id": "purchases", "name": "Besteld"}
         )
 
     def test_get_auth_exception(self):

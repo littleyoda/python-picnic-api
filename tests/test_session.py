@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from requests import Session
 
-from python_picnic_api.session import PicnicAPISession
+from python_picnic_api2.session import PicnicAPISession
 
 
 class TestSession(unittest.TestCase):
@@ -19,7 +19,8 @@ class TestSession(unittest.TestCase):
         )
 
         picnic_session = PicnicAPISession()
-        picnic_session.post("https://picnic.app/user/login", json={"test": "data"})
+        picnic_session.post("https://picnic.app/user/login",
+                            json={"test": "data"})
         self.assertDictEqual(
             dict(picnic_session.headers),
             {
