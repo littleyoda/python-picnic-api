@@ -1,17 +1,23 @@
-[tool.poetry]
+[project]
 name = "python-picnic-api2"
-version = "1.1.0"
+version = "1.1.2"
 description = ""
-license = "Apache-2.0"
-authors = ["Mike Brink <mjh.brink@icloud.com>", "Noah Groß <pypi@codesalat.dev>"]
 readme = "README.rst"
-repository = "https://github.com/codesalatdev/python-picnic-api"
+license = "Apache-2.0"
+maintainers = [
+  { name = "CodeSalat", email = "pypi@codesalat.dev"}
+]
+authors = [
+  { name = "Mike Brink", email = "mjh.brink@icloud.com"},
+  { name = "CodeSalat", email = "pypi@codesalat.dev"}
+]
+urls = {homepage = "https://github.com/codesalatdev/python-picnic-api", repository = "https://github.com/codesalatdev/python-picnic-api"}
+requires-python = ">=3.11"
 
-[tool.poetry.dependencies]
-python = ">=3.11.0"
+[[dependencies]]
 requests = "^2.24.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^8.3"
 ruff = "^0.9.6"
 python-dotenv = "^0.15.0"
