@@ -31,7 +31,7 @@ def test_login_auth_error():
 
     try:
         session = PicnicAPISession()
-        session.login('username', 'password', base_url)
+        session.login("username", "password", base_url)
     except PicnicAuthError:
         assert True
     else:

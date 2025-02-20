@@ -7,5 +7,6 @@
       python313Packages.flake8
       python313Packages.python-dotenv
       python313Packages.requests
+      ruff
     ];
 }

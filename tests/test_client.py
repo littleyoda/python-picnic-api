@@ -31,29 +31,34 @@ class TestClient(unittest.TestCase):
 
     def test_login_credentials(self):
         self.session_mock().authenticated = False
-        PicnicAPI(username='test@test.nl', password='test')
+        PicnicAPI(username="test@test.nl", password="test")
         self.session_mock().post.assert_called_with(
-            self.expected_base_url + '/user/login',
-            json={'key': 'test@test.nl', 'secret': '098f6bcd4621d373cade4e832627b4f6', "client_id": 30100}
+            self.expected_base_url + "/user/login",
+            json={
+                "key": "test@test.nl",
+                "secret": "098f6bcd4621d373cade4e832627b4f6",
+                "client_id": 30100,
+            },
         )
 
     def test_login_auth_token(self):
         self.session_mock().authenticated = True
-        PicnicAPI(username='test@test.nl', password='test', auth_token='a3fwo7f3h78kf3was7h8f3ahf3ah78f3')
+        PicnicAPI(
+            username="test@test.nl",
+            password="test",
+            auth_token="a3fwo7f3h78kf3was7h8f3ahf3ah78f3",
+        )
         self.session_mock().login.assert_not_called()
 
     def test_login_failed(self):
         response = {
-            "error": {
-                "code": "AUTH_INVALID_CRED",
-                "message": "Invalid credentials."
-            }
+            "error": {"code": "AUTH_INVALID_CRED", "message": "Invalid credentials."}
         }
         self.session_mock().post.return_value = self.MockResponse(response, 200)
 
         client = PicnicAPI()
         with self.assertRaises(PicnicAuthError):
-            client.login('test-user', 'test-password')
+            client.login("test-user", "test-password")
 
     def test_get_user(self):
         response = {
@@ -83,7 +88,9 @@ class TestClient(unittest.TestCase):
     def test_search(self):
         self.client.search("test-product")
         self.session_mock().get.assert_called_with(
-            self.expected_base_url + "/pages/search-page-results?search_term=test-product", headers=PICNIC_HEADERS
+            self.expected_base_url
+            + "/pages/search-page-results?search_term=test-product",
+            headers=PICNIC_HEADERS,
         )
 
     def test_get_lists(self):
