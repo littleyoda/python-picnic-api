@@ -1,4 +1,5 @@
 from hashlib import md5
+import re
 
 from .helper import (
     _tree_generator,
@@ -119,15 +120,28 @@ class PicnicAPI:
         return self._get("/cart")
 
     def get_article(self, article_id: str, add_category_name=False):
-        path = "/articles/" + article_id
-        article = self._get(path)
-        if add_category_name and "category_link" in article:
-            self.initialize_high_level_categories()
-            article.update(
-                category_name=_get_category_name(
-                    article["category_link"], self.high_level_categories
-                )
-            )
+        if add_category_name:
+            raise NotImplementedError()
+        path = f"/pages/product-details-page-root?id={article_id}"
+        data = self._get(path, add_picnic_headers=True)
+        article_details = []
+        for block in data["body"]["child"]["child"]["children"]:
+            if block["id"] == "product-details-page-root-main-container":
+                article_details = block["pml"]["component"]["children"]
+
+        if len(article_details) == 0:
+            return None
+
+        color_regex = re.compile(r"#\(#\d{6}\)")
+        producer = re.sub(color_regex, "", str(article_details[1]["markdown"]))
+        article_name = re.sub(color_regex, "", str(
+            article_details[0]["markdown"]))
+
+        article = {
+            "name": f"{producer} {article_name}",
+            "id": article_id
+        }
+
         return article
 
     def get_article_category(self, article_id: str):

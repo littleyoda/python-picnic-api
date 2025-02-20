@@ -1,6 +1,8 @@
 from python_picnic_api2 import PicnicAPI
 from dotenv import load_dotenv
 import os
+import pytest
+import time
 
 load_dotenv()
 
@@ -9,6 +11,12 @@ password = os.getenv("PASSWORD")
 country_code = os.getenv("COUNTRY_CODE")
 
 picnic = PicnicAPI(username, password, country_code=country_code)
+
+
+@pytest.fixture(autouse=True)
+def slow_down_tests():
+    yield
+    time.sleep(2)
 
 
 def _get_amount(cart: dict, product_id: str):
@@ -25,29 +33,25 @@ def test_get_user():
 
 
 def test_search():
-    response = picnic.search("koffie")
+    response = picnic.search("kaffee")
     assert isinstance(response, list)
     assert isinstance(response[0], dict)
-    assert "id" in response[0].keys()
-    assert response[0]["id"] == "koffie"
+    assert "items" in response[0].keys()
+    assert isinstance(response[0]["items"], list)
+    assert "id" in response[0]["items"][0]
 
 
 def test_get_article():
-    response = picnic.get_article("s1001546")
+    response = picnic.get_article("s1018620")
     assert isinstance(response, dict)
     assert "id" in response.keys()
-    assert response["id"] == "s1001546"
-    assert response["name"] == "Douwe Egberts aroma rood filterkoffie"
+    assert response["id"] == "s1018620"
+    assert response["name"] == "Gut&Günstig H-Milch 3,5%"
 
 
 def test_get_article_with_category_name():
-    response = picnic.get_article("s1001546", add_category_name=True)
-    assert isinstance(response, dict)
-    assert "id" in response.keys()
-    assert response["id"] == "s1001546"
-    assert response["name"] == "Douwe Egberts aroma rood filterkoffie"
-    assert "category_name" in response.keys()
-    assert response["category_name"] == "Koffie & thee"
+    with pytest.raises(NotImplementedError):
+        picnic.get_article("s1018620", add_category_name=True)
 
 
 def test_get_lists():
@@ -71,7 +75,8 @@ def test_add_product():
 
     assert isinstance(response, dict)
     assert "items" in response.keys()
-    assert any(item["id"] == "10407428" for item in response["items"][0]["items"])
+    assert any(
+        item["id"] == "10407428" for item in response["items"][0]["items"])
     assert _get_amount(response, "10407428") == 2
 
 
