@@ -4,7 +4,6 @@ import re
 from .helper import (
     _tree_generator,
     _url_generator,
-    _get_category_name,
     _extract_search_results,
 )
 from .session import PicnicAPISession, PicnicAuthError

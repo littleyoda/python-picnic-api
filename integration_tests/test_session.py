@@ -1,6 +1,5 @@
 from python_picnic_api2.session import PicnicAPISession, PicnicAuthError
 from python_picnic_api2.client import PicnicAPI
-from python_picnic_api2.helper import _url_generator
 from requests import Session
 from dotenv import load_dotenv
 import os
