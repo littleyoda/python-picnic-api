@@ -155,11 +155,11 @@ class PicnicAPI:
         path = "/deliveries/" + delivery_id + "/position"
         return self._get(path, add_picnic_headers=True)
 
-    def get_deliveries(self, summary: bool = False, data=None):
+    def get_deliveries(self, summary: bool = True, data=None):
         data = [] if data is None else data
-        if summary:
-            return self._post("/deliveries/summary", data=data)
-        return self._post("/deliveries", data=data)
+        if not summary:
+            raise NotImplementedError()
+        return self._post("/deliveries/summary", data=data)
 
     def get_current_deliveries(self):
         return self.get_deliveries(data=["CURRENT"])

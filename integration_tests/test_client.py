@@ -64,23 +64,23 @@ def test_get_cart():
 def test_add_product():
     # need a clear cart for reproducibility
     picnic.clear_cart()
-    response = picnic.add_product("10407428", count=2)
+    response = picnic.add_product("s1018620", count=2)
 
     assert isinstance(response, dict)
     assert "items" in response.keys()
     assert any(
-        item["id"] == "10407428" for item in response["items"][0]["items"])
-    assert _get_amount(response, "10407428") == 2
+        item["id"] == "s1018620" for item in response["items"][0]["items"])
+    assert _get_amount(response, "s1018620") == 2
 
 
 def test_remove_product():
     # need a clear cart for reproducibility
     picnic.clear_cart()
-    # add two coffee to the cart so we can remove 1
-    picnic.add_product("10407428", count=2)
+    # add two milk to the cart so we can remove 1
+    picnic.add_product("s1018620", count=2)
 
-    response = picnic.remove_product("10407428", count=1)
-    amount = _get_amount(response, "10407428")
+    response = picnic.remove_product("s1018620", count=1)
+    amount = _get_amount(response, "s1018620")
 
     assert isinstance(response, dict)
     assert "items" in response.keys()
@@ -91,7 +91,7 @@ def test_clear_cart():
     # need a clear cart for reproducibility
     picnic.clear_cart()
     # add two coffee to the cart so we can clear it
-    picnic.add_product("10407428", count=2)
+    picnic.add_product("s1018620", count=2)
 
     response = picnic.clear_cart()
 
@@ -108,27 +108,21 @@ def test_get_delivery_slots():
 
 
 def test_get_deliveries():
-    response_1 = picnic.get_deliveries()
-    response_2 = picnic.get_deliveries(summary=True)
+    response = picnic.get_deliveries()
 
-    assert isinstance(response_1, list)
-    assert isinstance(response_1[0], dict)
-    assert response_1[0]["type"] == "DELIVERY"
-
-    assert isinstance(response_2, list)
-    assert isinstance(response_2[0], dict)
-
-    assert response_1 != response_2
+    assert isinstance(response, list)
+    assert isinstance(response[0], dict)
+    assert response[0]["status"] == "COMPLETED"
 
 
 def test_get_delivery():
     # get a id to test against
     response = picnic.get_deliveries()
-    deliveryId = response[0]["id"]
+    deliveryId = response[0]["delivery_id"]
 
     response = picnic.get_delivery(deliveryId)
     assert isinstance(response, dict)
-    assert response["type"] == "DELIVERY"
+    assert response["status"] == "COMPLETED"
     assert response["id"] == deliveryId
 
 
