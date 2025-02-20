@@ -1,6 +1,6 @@
 import json
 import re
-from typing import List, Dict, Any, Optional
+from typing import Optional
 
 # prefix components:
 space = "    "
@@ -29,7 +29,7 @@ def _tree_generator(response: list, prefix: str = ""):
                 pre = f"{item['unit_quantity']} "
             after = ""
             if "display_price" in item.keys():
-                after = f" €{int(item['display_price'])/100.0:.2f}"
+                after = f" €{int(item['display_price']) / 100.0:.2f}"
 
             yield prefix + pointer + pre + item["name"] + after
         if "items" in item:  # extend the prefix and recurse:
@@ -73,24 +73,25 @@ def get_recipe_image(id: str, size="regular"):
 
 
 def get_image(id: str, size="regular", suffix="webp"):
-    assert (
-        "tile" in size if suffix == "webp" else True
-    ), "webp format only supports tile sizes"
+    assert "tile" in size if suffix == "webp" else True, (
+        "webp format only supports tile sizes"
+    )
     assert suffix in ["webp", "png"], "suffix must be webp or png"
     sizes = IMAGE_SIZES + [f"tile-{size}" for size in IMAGE_SIZES]
 
     assert size in sizes, "size must be one of: " + ", ".join(sizes)
     return f"{IMAGE_BASE_URL}/{id}/{size}.{suffix}"
 
+
 def _extract_search_results(raw_results, max_items: int = 10):
     """Extract search results from the nested dictionary structure returned by Picnic search.
     Number of max items can be defined to reduce excessive nested search"""
     search_results = []
-    
+
     def find_articles(node):
         if len(search_results) >= max_items:
             return
-        
+
         content = node.get("content", {})
         if content.get("type") == "SELLING_UNIT_TILE" and "sellingUnit" in content:
             selling_unit = content["sellingUnit"]
@@ -101,11 +102,11 @@ def _extract_search_results(raw_results, max_items: int = 10):
                 "sole_article_id": sole_article_id,
             }
             search_results.append(result_entry)
-        
+
         for child in node.get("children", []):
             find_articles(child)
 
     body = raw_results.get("body", {})
     find_articles(body.get("child", {}))
-    
+
     return [{"items": search_results}]

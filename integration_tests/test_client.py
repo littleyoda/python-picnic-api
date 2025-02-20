@@ -1,4 +1,4 @@
-from python_picnic_api import PicnicAPI
+from python_picnic_api2 import PicnicAPI
 from dotenv import load_dotenv
 import os
 
@@ -48,7 +48,7 @@ def test_get_article_with_category_name():
     assert response["name"] == "Douwe Egberts aroma rood filterkoffie"
     assert "category_name" in response.keys()
     assert response["category_name"] == "Koffie & thee"
-    
+
 
 def test_get_lists():
     response_1 = picnic.get_lists()

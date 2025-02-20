@@ -1,5 +1,5 @@
-from python_picnic_api.session import PicnicAPISession, PicnicAuthError
-from python_picnic_api.helper import _url_generator
+from python_picnic_api2.session import PicnicAPISession, PicnicAuthError
+from python_picnic_api2.helper import _url_generator
 from requests import Session
 from dotenv import load_dotenv
 import os
@@ -31,7 +31,7 @@ def test_login_auth_error():
 
     try:
         session = PicnicAPISession()
-        session.login('username', 'password', base_url)
+        session.login("username", "password", base_url)
     except PicnicAuthError:
         assert True
     else:

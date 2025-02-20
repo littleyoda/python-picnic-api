@@ -1,6 +1,11 @@
 from hashlib import md5
 
-from .helper import _tree_generator, _url_generator, _get_category_name, _extract_search_results
+from .helper import (
+    _tree_generator,
+    _url_generator,
+    _get_category_name,
+    _extract_search_results,
+)
 from .session import PicnicAPISession, PicnicAuthError
 
 DEFAULT_URL = "https://storefront-prod.{}.picnicinternational.com/api/{}"
@@ -11,8 +16,11 @@ DEFAULT_API_VERSION = "15"
 
 class PicnicAPI:
     def __init__(
-        self, username: str = None, password: str = None,
-        country_code: str = DEFAULT_COUNTRY_CODE, auth_token: str = None
+        self,
+        username: str = None,
+        password: str = None,
+        country_code: str = DEFAULT_COUNTRY_CODE,
+        auth_token: str = None,
     ):
         self._country_code = country_code
         self._base_url = _url_generator(
@@ -36,10 +44,14 @@ class PicnicAPI:
         url = self._base_url + path
 
         # Make the request, add special picnic headers if needed
-        headers = {
-            "x-picnic-agent": "30100;1.15.272-15295;",
-            "x-picnic-did": "3C417201548B2E3B"
-        } if add_picnic_headers else None
+        headers = (
+            {
+                "x-picnic-agent": "30100;1.15.272-15295;",
+                "x-picnic-did": "3C417201548B2E3B",
+            }
+            if add_picnic_headers
+            else None
+        )
         response = self.session.get(url, headers=headers).json()
 
         if self._contains_auth_error(response):
@@ -52,7 +64,9 @@ class PicnicAPI:
         response = self.session.post(url, json=data).json()
 
         if self._contains_auth_error(response):
-            raise PicnicAuthError(f"Picnic authentication error: {response['error'].get('message')}")
+            raise PicnicAuthError(
+                f"Picnic authentication error: {response['error'].get('message')}"
+            )
 
         return response
 
@@ -110,7 +124,9 @@ class PicnicAPI:
         if add_category_name and "category_link" in article:
             self.initialize_high_level_categories()
             article.update(
-                category_name=_get_category_name(article['category_link'], self.high_level_categories)
+                category_name=_get_category_name(
+                    article["category_link"], self.high_level_categories
+                )
             )
         return article
 

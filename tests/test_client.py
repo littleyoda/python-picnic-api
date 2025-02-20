@@ -1,12 +1,12 @@
 import unittest
 from unittest.mock import patch
 
-from python_picnic_api import PicnicAPI
-from python_picnic_api.client import DEFAULT_URL
-from python_picnic_api.session import PicnicAuthError
+from python_picnic_api2 import PicnicAPI
+from python_picnic_api2.client import DEFAULT_URL
+from python_picnic_api2.session import PicnicAuthError
 
 PICNIC_HEADERS = {
-    "x-picnic-agent": "30100;1.15.232-15154",
+    "x-picnic-agent": "30100;1.15.272-15295;",
     "x-picnic-did": "3C417201548B2E3B",
 }
 
@@ -21,7 +21,8 @@ class TestClient(unittest.TestCase):
             return self.json_data
 
     def setUp(self) -> None:
-        self.session_patcher = patch("python_picnic_api.client.PicnicAPISession")
+        self.session_patcher = patch(
+            "python_picnic_api2.client.PicnicAPISession")
         self.session_mock = self.session_patcher.start()
         self.client = PicnicAPI(username="test@test.nl", password="test")
         self.expected_base_url = DEFAULT_URL.format("nl", "15")
@@ -31,29 +32,34 @@ class TestClient(unittest.TestCase):
 
     def test_login_credentials(self):
         self.session_mock().authenticated = False
-        PicnicAPI(username='test@test.nl', password='test')
+        PicnicAPI(username="test@test.nl", password="test")
         self.session_mock().post.assert_called_with(
-            self.expected_base_url + '/user/login',
-            json={'key': 'test@test.nl', 'secret': '098f6bcd4621d373cade4e832627b4f6', "client_id": 30100}
+            self.expected_base_url + "/user/login",
+            json={
+                "key": "test@test.nl",
+                "secret": "098f6bcd4621d373cade4e832627b4f6",
+                "client_id": 30100,
+            },
         )
 
     def test_login_auth_token(self):
         self.session_mock().authenticated = True
-        PicnicAPI(username='test@test.nl', password='test', auth_token='a3fwo7f3h78kf3was7h8f3ahf3ah78f3')
+        PicnicAPI(
+            username="test@test.nl",
+            password="test",
+            auth_token="a3fwo7f3h78kf3was7h8f3ahf3ah78f3",
+        )
         self.session_mock().login.assert_not_called()
 
     def test_login_failed(self):
         response = {
-            "error": {
-                "code": "AUTH_INVALID_CRED",
-                "message": "Invalid credentials."
-            }
+            "error": {"code": "AUTH_INVALID_CRED", "message": "Invalid credentials."}
         }
         self.session_mock().post.return_value = self.MockResponse(response, 200)
 
         client = PicnicAPI()
         with self.assertRaises(PicnicAuthError):
-            client.login('test-user', 'test-password')
+            client.login("test-user", "test-password")
 
     def test_get_user(self):
         response = {
@@ -83,7 +89,9 @@ class TestClient(unittest.TestCase):
     def test_search(self):
         self.client.search("test-product")
         self.session_mock().get.assert_called_with(
-            self.expected_base_url + "/pages/search-page-results?search_term=test-product", headers=PICNIC_HEADERS
+            self.expected_base_url +
+            "/pages/search-page-results?search_term=test-product",
+            headers=PICNIC_HEADERS,
         )
 
     def test_get_lists(self):
@@ -200,7 +208,8 @@ class TestClient(unittest.TestCase):
         )
 
         self.assertDictEqual(
-            categories[0], {"type": "CATEGORY", "id": "purchases", "name": "Besteld"}
+            categories[0], {"type": "CATEGORY",
+                            "id": "purchases", "name": "Besteld"}
         )
 
     def test_get_auth_exception(self):
