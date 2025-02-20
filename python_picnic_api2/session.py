@@ -14,7 +14,7 @@ class PicnicAPISession(Session):
 
         self.headers.update(
             {
-                "User-Agent": "okhttp/3.9.0",
+                "User-Agent": "okhttp/4.9.0",
                 "Content-Type": "application/json; charset=UTF-8",
                 self.AUTH_HEADER: self._auth_token,
             }
