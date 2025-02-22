@@ -14,7 +14,8 @@ authors = [
 urls = {homepage = "https://github.com/codesalatdev/python-picnic-api", repository = "https://github.com/codesalatdev/python-picnic-api"}
 requires-python = ">=3.11"
 dependencies = [
-  "requests>=2.24.0"
+  "requests>=2.24.0",
+  "typing_extensions>=4.12.2"
 ]
 
 [tool.poetry.group.dev.dependencies]
@@ -23,9 +24,27 @@ ruff = "^0.9.6"
 python-dotenv = "^0.15.0"
 
 [tool.ruff]
-line-length = 80
+line-length = 88
 indent-width = 4
 target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+  # pycodestyle
+  "E",
+  # Pyflakes
+  "F",
+  # pyupgrade
+  "UP",
+  # flake8-bugbear
+  "B",
+  # flake8-simplify
+  "SIM",
+  # isort
+  "I",
+  # flake8-fixme
+  "FIX"
+]
 
 [build-system]
 requires = ["poetry-core"]

@@ -44,7 +44,7 @@ jobs:
         
     - name: Lint with ruff
       run: |
-        python -m poetry run ruff check
+        python -m poetry run ruff check --output-format=github --ignore FIX
     
     
     

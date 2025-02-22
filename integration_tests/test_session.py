@@ -1,8 +1,10 @@
-from python_picnic_api2.session import PicnicAPISession, PicnicAuthError
-from python_picnic_api2.client import PicnicAPI
-from requests import Session
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+from requests import Session
+
+from python_picnic_api2.client import PicnicAPI
+from python_picnic_api2.session import PicnicAPISession, PicnicAuthError
 
 load_dotenv()
 
@@ -19,16 +21,20 @@ def test_init():
 
 
 def test_login():
-    client = PicnicAPI(username=username, password=password,
-                       country_code=country_code)
-    assert "x-picnic-auth" in client.session.headers.keys()
+    client = PicnicAPI(
+        username=username, password=password, country_code=country_code
+    )
+    assert "x-picnic-auth" in client.session.headers
 
 
 def test_login_auth_error():
     try:
-        PicnicAPI(username="doesnotexistblue@me.com", password="PasSWorD12345!",
-                  country_code=country_code)
+        PicnicAPI(
+            username="doesnotexistblue@me.com",
+            password="PasSWorD12345!",
+            country_code=country_code,
+        )
     except PicnicAuthError:
         assert True
     else:
-        assert False
+        raise AssertionError()

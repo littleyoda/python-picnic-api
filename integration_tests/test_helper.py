@@ -1,5 +1,6 @@
-from python_picnic_api2.helper import get_image, get_recipe_image
 import requests
+
+from python_picnic_api2.helper import get_image, get_recipe_image
 
 
 def test_get_image():

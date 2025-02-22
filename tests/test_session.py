@@ -19,8 +19,9 @@ class TestSession(unittest.TestCase):
         )
 
         picnic_session = PicnicAPISession()
-        picnic_session.post("https://picnic.app/user/login",
-                            json={"test": "data"})
+        picnic_session.post(
+            "https://picnic.app/user/login", json={"test": "data"}
+        )
         self.assertDictEqual(
             dict(picnic_session.headers),
             {
@@ -35,7 +36,8 @@ class TestSession(unittest.TestCase):
 
     @patch.object(Session, "post")
     def test_update_auth_token_refresh(self, post_mock):
-        """Test that the auth-token is updated if a new one is given in the response headers."""
+        """Test that the auth-token is updated if a new one is given in the
+        response headers."""
         post_mock.return_value = self.MockResponse(
             {"x-picnic-auth": "renewed-auth-token"}
         )

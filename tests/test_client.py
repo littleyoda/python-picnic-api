@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import patch
 
+import pytest
+
 from python_picnic_api2 import PicnicAPI
 from python_picnic_api2.client import DEFAULT_URL
 from python_picnic_api2.session import PicnicAuthError
@@ -21,8 +23,7 @@ class TestClient(unittest.TestCase):
             return self.json_data
 
     def setUp(self) -> None:
-        self.session_patcher = patch(
-            "python_picnic_api2.client.PicnicAPISession")
+        self.session_patcher = patch("python_picnic_api2.client.PicnicAPISession")
         self.session_mock = self.session_patcher.start()
         self.client = PicnicAPI(username="test@test.nl", password="test")
         self.expected_base_url = DEFAULT_URL.format("nl", "15")
@@ -53,7 +54,10 @@ class TestClient(unittest.TestCase):
 
     def test_login_failed(self):
         response = {
-            "error": {"code": "AUTH_INVALID_CRED", "message": "Invalid credentials."}
+            "error": {
+                "code": "AUTH_INVALID_CRED",
+                "message": "Invalid credentials.",
+            }
         }
         self.session_mock().post.return_value = self.MockResponse(response, 200)
 
@@ -89,8 +93,8 @@ class TestClient(unittest.TestCase):
     def test_search(self):
         self.client.search("test-product")
         self.session_mock().get.assert_called_with(
-            self.expected_base_url +
-            "/pages/search-page-results?search_term=test-product",
+            self.expected_base_url
+            + "/pages/search-page-results?search_term=test-product",
             headers=PICNIC_HEADERS,
         )
 
@@ -154,10 +158,14 @@ class TestClient(unittest.TestCase):
         )
 
     def test_get_deliveries_summary(self):
-        self.client.get_deliveries(summary=True)
+        self.client.get_deliveries()
         self.session_mock().post.assert_called_with(
             self.expected_base_url + "/deliveries/summary", json=[]
         )
+
+    def test_get_deliveries(self):
+        with pytest.raises(NotImplementedError):
+            self.client.get_deliveries(summary=False)
 
     def test_get_current_deliveries(self):
         self.client.get_current_deliveries()
@@ -184,8 +192,8 @@ class TestClient(unittest.TestCase):
         )
 
         self.assertDictEqual(
-            categories[0], {"type": "CATEGORY",
-                            "id": "purchases", "name": "Besteld"}
+            categories[0],
+            {"type": "CATEGORY", "id": "purchases", "name": "Besteld"},
         )
 
     def test_get_auth_exception(self):

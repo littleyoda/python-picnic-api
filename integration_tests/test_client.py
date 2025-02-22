@@ -1,8 +1,10 @@
-from python_picnic_api2 import PicnicAPI
-from dotenv import load_dotenv
 import os
-import pytest
 import time
+
+import pytest
+from dotenv import load_dotenv
+
+from python_picnic_api2 import PicnicAPI
 
 load_dotenv()
 
@@ -28,7 +30,7 @@ def _get_amount(cart: dict, product_id: str):
 def test_get_user():
     response = picnic.get_user()
     assert isinstance(response, dict)
-    assert "contact_email" in response.keys()
+    assert "contact_email" in response
     assert response["contact_email"] == username
 
 
@@ -36,7 +38,7 @@ def test_search():
     response = picnic.search("kaffee")
     assert isinstance(response, list)
     assert isinstance(response[0], dict)
-    assert "items" in response[0].keys()
+    assert "items" in response[0]
     assert isinstance(response[0]["items"], list)
     assert "id" in response[0]["items"][0]
 
@@ -44,7 +46,7 @@ def test_search():
 def test_get_article():
     response = picnic.get_article("s1018620")
     assert isinstance(response, dict)
-    assert "id" in response.keys()
+    assert "id" in response
     assert response["id"] == "s1018620"
     assert response["name"] == "Gut&Günstig H-Milch 3,5%"
 
@@ -57,7 +59,7 @@ def test_get_article_with_category_name():
 def test_get_cart():
     response = picnic.get_cart()
     assert isinstance(response, dict)
-    assert "id" in response.keys()
+    assert "id" in response
     assert response["id"] == "shopping_cart"
 
 
@@ -67,9 +69,8 @@ def test_add_product():
     response = picnic.add_product("s1018620", count=2)
 
     assert isinstance(response, dict)
-    assert "items" in response.keys()
-    assert any(
-        item["id"] == "s1018620" for item in response["items"][0]["items"])
+    assert "items" in response
+    assert any(item["id"] == "s1018620" for item in response["items"][0]["items"])
     assert _get_amount(response, "s1018620") == 2
 
 
@@ -83,7 +84,7 @@ def test_remove_product():
     amount = _get_amount(response, "s1018620")
 
     assert isinstance(response, dict)
-    assert "items" in response.keys()
+    assert "items" in response
     assert amount == 1
 
 
@@ -96,14 +97,14 @@ def test_clear_cart():
     response = picnic.clear_cart()
 
     assert isinstance(response, dict)
-    assert "items" in response.keys()
+    assert "items" in response
     assert len(response["items"]) == 0
 
 
 def test_get_delivery_slots():
     response = picnic.get_delivery_slots()
     assert isinstance(response, dict)
-    assert "delivery_slots" in response.keys()
+    assert "delivery_slots" in response
     assert isinstance(response["delivery_slots"], list)
 
 
@@ -143,4 +144,4 @@ def test_print_categories(capsys):
     assert isinstance(captured.out, str)
 
 
-# TO DO: add test for re-logging
+# TODO: add test for re-logging

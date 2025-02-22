@@ -1,6 +1,5 @@
 import json
 import re
-from typing import Optional
 
 # prefix components:
 space = "    "
@@ -10,7 +9,9 @@ tee = "├── "
 last = "└── "
 
 IMAGE_SIZES = ["small", "medium", "regular", "large", "extra-large"]
-IMAGE_BASE_URL = "https://storefront-prod.nl.picnicinternational.com/static/images"
+IMAGE_BASE_URL = (
+    "https://storefront-prod.nl.picnicinternational.com/static/images"
+)
 
 SOLE_ARTICLE_ID_PATTERN = re.compile(r'"sole_article_id":"(\w+)"')
 
@@ -22,13 +23,13 @@ def _tree_generator(response: list, prefix: str = ""):
     """
     # response each get pointers that are ├── with a final └── :
     pointers = [tee] * (len(response) - 1) + [last]
-    for pointer, item in zip(pointers, response):
+    for pointer, item in zip(pointers, response, strict=False):
         if "name" in item:  # print the item
             pre = ""
-            if "unit_quantity" in item.keys():
+            if "unit_quantity" in item:
                 pre = f"{item['unit_quantity']} "
             after = ""
-            if "display_price" in item.keys():
+            if "display_price" in item:
                 after = f" €{int(item['display_price']) / 100.0:.2f}"
 
             yield prefix + pointer + pre + item["name"] + after
@@ -42,7 +43,7 @@ def _url_generator(url: str, country_code: str, api_version: str):
     return url.format(country_code.lower(), api_version)
 
 
-def _get_category_id_from_link(category_link: str) -> Optional[str]:
+def _get_category_id_from_link(category_link: str) -> str | None:
     pattern = r"categories/(\d+)"
     first_number = re.search(pattern, category_link)
     if first_number:
@@ -52,7 +53,7 @@ def _get_category_id_from_link(category_link: str) -> Optional[str]:
         return None
 
 
-def _get_category_name(category_link: str, categories: list) -> Optional[str]:
+def _get_category_name(category_link: str, categories: list) -> str | None:
     category_id = _get_category_id_from_link(category_link)
     if category_id:
         category = next(
@@ -84,8 +85,9 @@ def get_image(id: str, size="regular", suffix="webp"):
 
 
 def _extract_search_results(raw_results, max_items: int = 10):
-    """Extract search results from the nested dictionary structure returned by Picnic search.
-    Number of max items can be defined to reduce excessive nested search"""
+    """Extract search results from the nested dictionary structure returned by
+    Picnic search. Number of max items can be defined to reduce excessive nested
+    search"""
     search_results = []
 
     def find_articles(node):
@@ -93,7 +95,10 @@ def _extract_search_results(raw_results, max_items: int = 10):
             return
 
         content = node.get("content", {})
-        if content.get("type") == "SELLING_UNIT_TILE" and "sellingUnit" in content:
+        if (
+            content.get("type") == "SELLING_UNIT_TILE"
+            and "sellingUnit" in content
+        ):
             selling_unit = content["sellingUnit"]
             sole_article_ids = SOLE_ARTICLE_ID_PATTERN.findall(json.dumps(node))
             sole_article_id = sole_article_ids[0] if sole_article_ids else None

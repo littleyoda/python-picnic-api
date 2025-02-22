@@ -1,10 +1,12 @@
-from hashlib import md5
 import re
+from hashlib import md5
+
+import typing_extensions
 
 from .helper import (
+    _extract_search_results,
     _tree_generator,
     _url_generator,
-    _extract_search_results,
 )
 from .session import PicnicAPISession, PicnicAuthError
 
@@ -60,12 +62,13 @@ class PicnicAPI:
         return response
 
     def _post(self, path: str, data=None, base_url_override=None):
-        url = (self._base_url if not base_url_override else base_url_override) + path
+        url = (base_url_override if base_url_override else self._base_url) + path
         response = self.session.post(url, json=data).json()
 
         if self._contains_auth_error(response):
             raise PicnicAuthError(
-                f"Picnic authentication error: {response['error'].get('message')}"
+                f"Picnic authentication error: \
+                    {response['error'].get('message')}"
             )
 
         return response
@@ -114,13 +117,9 @@ class PicnicAPI:
 
         color_regex = re.compile(r"#\(#\d{6}\)")
         producer = re.sub(color_regex, "", str(article_details[1]["markdown"]))
-        article_name = re.sub(color_regex, "", str(
-            article_details[0]["markdown"]))
+        article_name = re.sub(color_regex, "", str(article_details[0]["markdown"]))
 
-        article = {
-            "name": f"{producer} {article_name}",
-            "id": article_id
-        }
+        article = {"name": f"{producer} {article_name}", "id": article_id}
 
         return article
 
@@ -154,7 +153,14 @@ class PicnicAPI:
         path = "/deliveries/" + delivery_id + "/position"
         return self._get(path, add_picnic_headers=True)
 
-    def get_deliveries(self, summary: bool = True, data=None):
+    @typing_extensions.deprecated(
+        """The option to show unsummarized deliveries was removed by picnic.
+        The optional parameter 'summary' will be removed in the future and default
+        to True.
+        You can ignore this warning if you do not pass the 'summary' argument to
+        this function."""
+    )
+    def get_deliveries(self, summary: bool = True, data: list = None):
         data = [] if data is None else data
         if not summary:
             raise NotImplementedError()

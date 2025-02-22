@@ -22,7 +22,8 @@ class PicnicAPISession(Session):
 
     @property
     def authenticated(self):
-        """Returns whether the user is authenticated by checking if the authentication token is set."""
+        """Returns whether the user is authenticated by checking if the
+        authentication token is set."""
         return bool(self._auth_token)
 
     @property
@@ -38,14 +39,14 @@ class PicnicAPISession(Session):
 
     def get(self, url, **kwargs) -> Response:
         """Do a GET request and update the auth token if set."""
-        response = super(PicnicAPISession, self).get(url, **kwargs)
+        response = super().get(url, **kwargs)
         self._update_auth_token(response.headers.get(self.AUTH_HEADER))
 
         return response
 
     def post(self, url, data=None, json=None, **kwargs) -> Response:
         """Do a POST request and update the auth token if set."""
-        response = super(PicnicAPISession, self).post(url, data, json, **kwargs)
+        response = super().post(url, data, json, **kwargs)
         self._update_auth_token(response.headers.get(self.AUTH_HEADER))
 
         return response
