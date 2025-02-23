@@ -3,12 +3,9 @@ description: Create a report to help us improve
 title: 'Enter a summary of the issue'
 labels: "bug"
 body:
-- type: markdown
-  attributes:
-    value: "**Describe the bug"
 - type: textarea
   attributes:
-    label: A short description about what is happening
+    label: Describe the bug
   validations:
     required: true
 - type: textarea
