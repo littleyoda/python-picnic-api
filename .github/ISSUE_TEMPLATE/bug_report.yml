@@ -24,4 +24,4 @@ body:
 - type: input
   attributes:
     label: Python Version
-  placeholder: X.YY
+    placeholder: X.YY
