@@ -1,0 +1,20 @@
+name: Bug report
+description: Create a report to help us improve
+title: 'Enter a summary of the issue'
+labels: "bug"
+body:
+- type: markdown
+  attributes:
+    value: "**Describe the bug"
+- type: textarea
+  label: A short description about what is happening
+  required: true
+- type: textarea
+  label: Steps to reproduce the issue
+  required: true
+- type: textarea
+  label: What did you expect to happen instead?
+  required: true
+- type: input
+  label: Python Version
+  placeholder: X.YY
