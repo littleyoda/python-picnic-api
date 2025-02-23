@@ -7,14 +7,21 @@ body:
   attributes:
     value: "**Describe the bug"
 - type: textarea
-  label: A short description about what is happening
-  required: true
+  attributes:
+    label: A short description about what is happening
+  validations:
+    required: true
 - type: textarea
-  label: Steps to reproduce the issue
-  required: true
+  attributes:
+    label: Steps to reproduce the issue
+  validations:
+    required: true
 - type: textarea
-  label: What did you expect to happen instead?
-  required: true
+  attributes:
+    label: What did you expect to happen instead?
+  validations:
+    required: true
 - type: input
-  label: Python Version
+  attributes:
+    label: Python Version
   placeholder: X.YY
