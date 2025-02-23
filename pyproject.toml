@@ -1,6 +1,6 @@
 [project]
 name = "python-picnic-api2"
-version = "1.1.2"
+version = "1.2.1"
 description = ""
 readme = "README.rst"
 license = "Apache-2.0"
