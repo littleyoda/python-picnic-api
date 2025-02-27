@@ -1,5 +1,6 @@
 import re
 from hashlib import md5
+from urllib.parse import quote
 
 import typing_extensions
 
@@ -95,7 +96,7 @@ class PicnicAPI:
         return self._get("/user")
 
     def search(self, term: str):
-        path = f"/pages/search-page-results?search_term={term}"
+        path = f"/pages/search-page-results?search_term={quote(term)}"
         raw_results = self._get(path, add_picnic_headers=True)
         return _extract_search_results(raw_results)
 

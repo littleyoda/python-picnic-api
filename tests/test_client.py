@@ -98,6 +98,14 @@ class TestClient(unittest.TestCase):
             headers=PICNIC_HEADERS,
         )
 
+    def test_search_encoding(self):
+        self.client.search("Gut&Günstig H-Milch")
+        self.session_mock().get.assert_called_with(
+            self.expected_base_url
+            + "/pages/search-page-results?search_term=Gut%26G%C3%BCnstig%20H-Milch",
+            headers=PICNIC_HEADERS,
+        )
+
     def test_get_cart(self):
         self.client.get_cart()
         self.session_mock().get.assert_called_with(
