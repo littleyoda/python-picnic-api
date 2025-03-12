@@ -40,7 +40,7 @@ jobs:
         PASSWORD: ${{ secrets.PICNIC_PASSWORD }}
         COUNTRY_CODE: ${{ secrets.PICNIC_COUNTRY_CODE }}
       run: |
-        python -m poetry run pytest tests/ --cov
+        python -m poetry run pytest tests/ --cov --cov-report=xml
         
     - name: Lint with ruff
       run: |
