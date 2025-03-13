@@ -11,19 +11,19 @@ jobs:
       with:
         python-version: 3.11
   
-    - name: Install poetry 2.1.1
+    - name: Install uv 0.6.6
       run: |
         python -m ensurepip
         python -m pip install --upgrade pip
-        python -m pip install poetry==2.1.1
+        python -m pip install uv==0.6.6
   
     - name: Install dependencies
       shell: bash
-      run: python -m poetry install
+      run: uv sync
   
     - name: Build package
       shell: bash
-      run: python -m poetry build
+      run: uv build
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
