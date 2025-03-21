@@ -12,3 +12,6 @@ changelog:
     - title: 👒 Dependencies
       labels:
         - dependencies
+    - title: Others
+      labels:
+        - "*"
