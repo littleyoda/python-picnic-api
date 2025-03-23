@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 
 # prefix components:
@@ -7,6 +8,8 @@ branch = "│   "
 # pointers:
 tee = "├── "
 last = "└── "
+
+LOGGER = logging.getLogger(__name__)
 
 IMAGE_SIZES = ["small", "medium", "regular", "large", "extra-large"]
 IMAGE_BASE_URL = "https://storefront-prod.nl.picnicinternational.com/static/images"
@@ -89,18 +92,21 @@ def _extract_search_results(raw_results, max_items: int = 10):
     search_results = []
 
     def find_articles(node):
+        LOGGER.debug(f"Searching for products in {node}")
         if len(search_results) >= max_items:
             return
 
         content = node.get("content", {})
         if content.get("type") == "SELLING_UNIT_TILE" and "sellingUnit" in content:
             selling_unit = content["sellingUnit"]
-            sole_article_ids = SOLE_ARTICLE_ID_PATTERN.findall(json.dumps(node))
+            sole_article_ids = SOLE_ARTICLE_ID_PATTERN.findall(
+                json.dumps(node))
             sole_article_id = sole_article_ids[0] if sole_article_ids else None
             result_entry = {
                 **selling_unit,
                 "sole_article_id": sole_article_id,
             }
+            LOGGER.debug(f"Found article {result_entry}")
             search_results.append(result_entry)
 
         for child in node.get("children", []):
@@ -109,7 +115,11 @@ def _extract_search_results(raw_results, max_items: int = 10):
         if "child" in node:
             find_articles(node.get("child"))
 
+        LOGGER.debug(f"Leaving extraction for node {node}")
+
     body = raw_results.get("body", {})
     find_articles(body.get("child", {}))
+
+    LOGGER.debug(f"Found {len(search_results)} products after extraction")
 
     return [{"items": search_results}]
