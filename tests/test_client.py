@@ -23,7 +23,8 @@ class TestClient(unittest.TestCase):
             return self.json_data
 
     def setUp(self) -> None:
-        self.session_patcher = patch("python_picnic_api2.client.PicnicAPISession")
+        self.session_patcher = patch(
+            "python_picnic_api2.client.PicnicAPISession")
         self.session_mock = self.session_patcher.start()
         self.client = PicnicAPI(username="test@test.nl", password="test")
         self.expected_base_url = DEFAULT_URL.format("nl", "15")
@@ -103,6 +104,13 @@ class TestClient(unittest.TestCase):
         self.session_mock().get.assert_called_with(
             self.expected_base_url
             + "/pages/search-page-results?search_term=Gut%26G%C3%BCnstig%20H-Milch",
+            headers=PICNIC_HEADERS,
+        )
+
+    def test_get_article(self):
+        self.client.get_article("p3f2qa")
+        self.session_mock().get.assert_called_with(
+            "https://storefront-prod.nl.picnicinternational.com/api/15/pages/product-details-page-root?id=p3f2qa",
             headers=PICNIC_HEADERS,
         )
 
