@@ -1,8 +1,11 @@
 import re
 from hashlib import md5
 from urllib.parse import quote
-
+import json
+import jq
 import typing_extensions
+import urllib.parse
+
 
 from .helper import (
     _extract_search_results,
@@ -192,6 +195,174 @@ class PicnicAPI:
                 return None
             url = r.headers["Location"]
         return None
+    
+    JQ_EXTRACTION_FILTER = r'''
+        # Extract accordion data
+        def accordion_data:
+          [
+            .body.child.child.children[]? | 
+            select(.id == "accordion-section")? | 
+            .children[]? | 
+            select(.id == "product-page-accordions")? | 
+            .pml.component.items[]? | 
+            (.header.child.children[]? | select(.type == "ICON" and has("iconKey"))? | .iconKey) as $icon |
+            if $icon == "apple" then
+              {
+                iconKey: $icon,
+                markdowns: [.body.child.children[]? | select(.type == "STACK") | 
+                            [.children[]? | select(.type == "RICH_TEXT" and has("markdown")) | .markdown] | 
+                            select(length > 0)]
+              }
+            else
+              {
+                iconKey: $icon,
+                markdowns: [.body | .. | objects | select(.type == "RICH_TEXT" and has("markdown")) | .markdown]
+              }
+            end |
+            select(.iconKey and (.markdowns | length > 0))
+          ] | 
+          map({(.iconKey): .markdowns}) | 
+          add // {};
+        
+        # Extract name data from main container
+        def name_data:
+          (.. | objects | select(.id == "product-details-page-root-main-container") | 
+           .pml.component.children) as $children |
+          
+          if ($children | length) > 0 then
+            # First child is always the product name (RICH_TEXT with HEADER1)
+            ($children[0] | select(.type == "RICH_TEXT" and .textType == "HEADER1") | .markdown | gsub("#\\(#[0-9a-fA-F]+\\)"; "")) as $name |
+            
+            # Check if second child is manufacturer (RICH_TEXT with textAttributes, no textType) or skip if STACK
+            (if ($children | length) > 1 and ($children[1].type == "RICH_TEXT") and (($children[1].textType // null) == null) and ($children[1] | has("textAttributes")) 
+             then ($children[1].markdown) 
+             else null end) as $manufacturer |
+            
+            # Find weight in STACK children
+            ($children[] | select(.type == "STACK") | .children[]? | select(.type == "RICH_TEXT" and has("markdown")) | .markdown | gsub("#\\(#[0-9a-fA-F]+\\)"; "")) as $weight |
+            
+            {
+              product: ($name // null),
+              manufacturer: ($manufacturer // null),  
+              quantity: ($weight // null),
+              name: (if ($manufacturer // null) != null then ($manufacturer + " " + ($name // "")) else ($name // null) end)
+            }
+          else {} end;
+        
+        # Extract image IDs from main image container
+        def image_data:
+          (.. | objects | select(.id == "product-page-image-gallery-main-image-container") | 
+           [.. | objects | select(.type == "IMAGE" and has("source")) | .source.id]) as $image_ids |
+          if ($image_ids | length) > 0 then {image_ids: $image_ids} else {} end;
+        
+        # Extract selling_unit_id from analytics
+        def selling_unit_data:
+          ([.. | objects | select(has("analytics")) | .analytics.contexts[]? | select(has("data")) | .data | select(has("selling_unit_id")) | .selling_unit_id] | unique) as $selling_unit_ids |
+          if ($selling_unit_ids | length) > 0 then {selling_unit_id: ($selling_unit_ids[0] // null)} else {} end;
+        
+        # Extract product description (optional) 
+        def description_data:
+          ([.. | objects | select(.id == "product-page-description") | .. | objects | select(.type == "RICH_TEXT" and has("markdown")) | .markdown]) as $description_markdowns |
+          {"product-description": $description_markdowns};
+        
+        # Extract categories from target URLs
+        def category_data:
+          ([.. | objects | select(has("target")) | .target | select(test("app\\.picnic://categories/")) | capture("app\\.picnic://categories/(?<l1>[0-9]+)(/l2/(?<l2>[0-9]+))?(/l3/(?<l3>[0-9]+))?") | [.l1, .l2, .l3] | map(select(. != null)) | map(tonumber)] | unique) as $categories |
+          if ($categories | length) > 0 then {"categories": ($categories[0] // [])} else {} end;
+        
+        # Extract allergies from product-page-allergies
+        def allergies_data:
+          ([.. | objects | select(.id == "product-page-allergies") | .. | objects | select(.type == "RICH_TEXT" and has("markdown")) | .markdown] | unique) as $allergies |
+          if ($allergies | length) > 0 then {"allergies": $allergies} else {} end;
+        
+        # Rename keys after extraction
+        (accordion_data // {}) + (name_data // {}) + (image_data // {}) + (selling_unit_data // {}) + (description_data // {}) + (category_data // {}) + (allergies_data // {}) |
+        with_entries(
+          if .key == "whisk" then .key = "preparation"
+          elif .key == "apple" then .key = "nutritional_values"
+          elif .key == "list" then .key = "ingredients"  
+          elif .key == "infoCircle" then .key = "info"
+          else .
+          end
+        )
+    '''
+    
+    def get_article_details(self, article_id):
+        path = f"/pages/product-details-page-root?id={article_id}&show_category_action=true"
+        data = self._get(path, add_picnic_headers=True)
+    
+        # Use jq to extract accordion data
+        compiled_filter = jq.compile(self.JQ_EXTRACTION_FILTER)
+        
+        # Handle StopIteration for queries that return no results
+        try:
+            result = compiled_filter.input(data).first()
+        except StopIteration:
+            return None
+        
+        if not result or not isinstance(result, dict) or not result:
+            return None
+        return result
+
+
+    def getRecipes(self, searchTerm):
+        searchTerm = urllib.parse.quote_plus(searchTerm)
+        recipes = self._get(f"/pages/search-page-results?search_term={searchTerm}&page_context=MEALS&is_recipe=true", add_picnic_headers=True)
+    
+        query = (
+                # Search in the recipes search results
+                '.. | objects | select(.id=="search-flat-recipes-result") | .children[] | {'
+                # Recipe Name
+                ' name: .pml.component.accessibilityLabel, '
+                # Return first recipe_id
+                'recipe_id: ([ .. | objects | .recipe_id? ] | map(select(. != null)) | .[0]), '
+                # Return first image_id
+                'image_id: ([ .. | objects | select(.type=="IMAGE") | .source.id? ] | map(select(. != null)) | .[0])'
+                '}'
+            )
+        
+        compiled = jq.compile(query)
+        return compiled.input(recipes).all()
+
+    def getRecipeDetails(self, recipe_id):
+        data = self._get(f"/pages/recipe-details-page?recipe_id={recipe_id}", add_picnic_headers=True)
+     
+        extraction = {
+            "ingredients":(
+                ".. | objects | select(.id==\"recipe-core-ingredients-details-section\")"
+                " | .. | objects | .markdown? | select(type == \"string\")"
+                ),
+            "utensils":(
+                ".. | objects | select(.id==\"recipe-ingredients-utensils\")"
+                " | .. | objects | .markdown? | select(type == \"string\")"
+            ),
+            "instructions": (
+                ".. | objects | select(.id==\"recipe-details-instructions-section\")"
+                " | .. | objects | .markdown? | select(type == \"string\")"
+            ),
+            "description": (
+                ".. | objects | select(.id==\"recipe-description-section\")"
+                " | .. | objects | .markdown? | select(type == \"string\")"
+            ),
+            "articles": (
+                ".. | objects | select(.id==\"recipe-portioning-content-wrapper\")"
+                " | .. | objects | .ingredientsState? | select(. != null) | .[]"
+            ),        
+            "name": (
+                ".. | objects | select(.type==\"RICH_TEXT\" and .textType==\"HEADLINE1\")"
+                " | .markdown? | select(type == \"string\")"
+            ),
+            "url": (
+                ".. | strings | select(test(\"https://picnic[.]app/de/go/[A-Za-z0-9]+\"))"
+                " | match(\"https://picnic[.]app/de/go/[A-Za-z0-9]+\").string"
+            )
+        }
+    
+        out = {}
+        for desc, expression in extraction.items():
+            compiled = jq.compile(expression)
+            out[desc] = compiled.input(data).all() 
+        return out
 
 
 __all__ = ["PicnicAPI"]
