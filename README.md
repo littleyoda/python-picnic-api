@@ -102,3 +102,25 @@ picnic.get_delivery_slots()
 ```python
 {'delivery_slots': [{'slot_id': 'XXYYZZ', 'hub_id': 'YYY', 'fc_id': 'FCX', 'window_start': '2025-04-29T17:15:00.000+02:00', 'window_end': '2025-04-29T19:15:00.000+02:00'...
 ```
+
+## Summary of the new features 
+```
+import json
+import sys
+from python_picnic_api2 import PicnicAPI
+
+p = PicnicAPI("XXXX","XXXXXX",'de');
+
+print("\nSearch Results:")
+searchResults = p.getRecipes("pizza")[0:5] # Limit to 5
+print(json.dumps(searchResults, ensure_ascii=False, indent=2))
+
+print("\nRecipe:")
+details = p.getRecipeDetails("635b758a8004aa048d27193d")
+print(json.dumps(details, ensure_ascii=False, indent=2))
+
+
+print("\nArticle Details:")
+d = p.get_article_details("s1028337")
+print(json.dumps(d, indent=4))
+```
