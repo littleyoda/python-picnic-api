@@ -25,4 +25,10 @@ print(json.dumps(details, ensure_ascii=False, indent=2))
 print("\nArticle Details:")
 d = p.get_article_details("s1028337")
 print(json.dumps(d, indent=4))
+
+print("\nCategories:")
+for category in d["categories"]:
+    out = p.getCategoryDetails(category)
+    print(f'{category}: {"" if out is None else out["name"]}')
+
 ```
