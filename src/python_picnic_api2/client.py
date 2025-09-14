@@ -364,5 +364,13 @@ class PicnicAPI:
             out[desc] = compiled.input(data).all() 
         return out
 
+    def getCategoryDetails(self, categoryId):
+        self.initialize_high_level_categories()
+       
+        try:
+            return jq.compile(f'.[] | recurse(.items[]) | select(.id == \"{categoryId}\")').input(self.high_level_categories).first()
+        except StopIteration:
+            return None
+
 
 __all__ = ["PicnicAPI"]
