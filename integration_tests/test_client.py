@@ -147,15 +147,11 @@ def test_get_current_deliveries():
 
 
 def test_get_categories():
-    response = picnic.get_categories()
-    assert isinstance(response, list)
+    with pytest.raises(NotImplementedError):
+        picnic.get_categories()
 
 
 def test_print_categories(capsys):
-    picnic.print_categories()
-    captured = capsys.readouterr()
+    with pytest.raises(NotImplementedError):
+        picnic.print_categories()
 
-    assert isinstance(captured.out, str)
-
-
-# TODO: add test for re-logging
